@@ -42,7 +42,7 @@
         "repositoryURL": "https://gitlab.nexustls.com/libraries/nats_utilities.git",
         "state": {
           "branch": "NIO2",
-          "revision": "a99321fcc5c605c026e045e614259d637da8895c",
+          "revision": "98a76e317a45015049f2670d7f4613752b2bff70",
           "version": null
         }
       },
@@ -114,8 +114,8 @@
         "repositoryURL": "https://github.com/apple/swift-nio-ssl.git",
         "state": {
           "branch": null,
-          "revision": "f5dd7a60ff56f501ff7bf9be753e4b1875bfaf20",
-          "version": "2.4.0"
+          "revision": "109faef770994e71b6bafcc015e2e96b88a4af8c",
+          "version": "2.4.1"
         }
       },
       {

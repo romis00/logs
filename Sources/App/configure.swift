@@ -4,7 +4,7 @@ import Nats
 import NatsUtilities
 
 /// Called before your application initializes.
-func configure(_ s: inout Services) throws {
+func configure(_ s: inout Services) {
     /// Register providers first
 
     /// Register routes
