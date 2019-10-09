@@ -6,7 +6,9 @@ import NatsUtilities
 /// Called before your application initializes.
 func configure(_ s: inout Services) {
     /// Register providers first
-
+    s.register(HTTPServer.Configuration.self) { c in
+         return HTTPServer.Configuration( port: 9192)
+     }
     /// Register routes
     s.extend(Routes.self) { r, c in
         try routes(r, c)
