@@ -1,11 +1,11 @@
-import Fluent
-import FluentSQLiteDriver
+
 import Vapor
+import Nats
+import NatsUtilities
 
 /// Called before your application initializes.
 func configure(_ s: inout Services) throws {
     /// Register providers first
-    s.provider(FluentProvider())
 
     /// Register routes
     s.extend(Routes.self) { r, c in
@@ -26,21 +26,19 @@ func configure(_ s: inout Services) throws {
         return middlewares
     }
     
-    s.extend(Databases.self) { dbs, c in
-        try dbs.sqlite(configuration: c.make(), threadPool: c.make())
+    s.register(CompletionHandlers.self) { _ -> (CompletionHandlers) in
+        return CompletionHandlers(constantsName: CONSTANTS.INSTANCE_NAME, constantsID: CONSTANTS.INSTANCE_ID)
     }
-
-    s.register(SQLiteConfiguration.self) { c in
-        return .init(storage: .connection(.file(path: "db.sqlite")))
+    s.register(GraylogController.self) { c in
+        try GraylogController(c: c)
     }
-
-    s.register(Database.self) { c in
-        return try c.make(Databases.self).database(.sqlite)!
+    s.register(NatsRouter.self) { c in
+        RouterController(c: c, gray: try c.make())
     }
     
-    s.register(Migrations.self) { c in
-        var migrations = Migrations()
-        migrations.add(CreateTodo(), to: .sqlite)
-        return migrations
+    s.register(NatsServer.self) { container in
+        let config = NatsConfig(servers: [.init(hostname: "10.7.7.137")], serverNumberOfThreads: .single, disBehavior: .reconnect, clusterName: nil)
+        return try NatsServer(natsConfig: config)
+        
     }
 }

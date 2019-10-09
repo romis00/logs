@@ -1,8 +1,7 @@
-import Fluent
 import Vapor
 
 func routes(_ r: Routes, _ c: Container) throws {
-    r.get { req in
+    r.get { req -> String in
         return "It works!"
     }
 
@@ -10,8 +9,4 @@ func routes(_ r: Routes, _ c: Container) throws {
         return "Hello, world!"
     }
 
-    let todoController = try TodoController(db: c.make())
-    r.get("todos", use: todoController.index)
-    r.post("todos", use: todoController.create)
-    r.on(.DELETE, "todos", ":todoID", use: todoController.delete)
 }
