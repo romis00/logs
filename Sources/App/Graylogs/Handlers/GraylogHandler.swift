@@ -17,17 +17,15 @@ public final class GraylogHandler: ChannelInboundHandler {
     public typealias OutboundOut = Data
 
     
-    public let container: Container
+    //public let container: Container
     public let logger: Logger
     
 
     
     private var context: ChannelHandlerContext?
 
-    init(container: Container, logger: Logger = Logger(label: "Nats.Client")) {
-        self.logger = logger
-        self.container = container
-        
+    init(logger: Logger = Logger(label: "Nats.Client")) {
+        self.logger = logger        
     }
 
     public func write(context: ChannelHandlerContext, data: NIOAny, promise: EventLoopPromise<Void>?) {

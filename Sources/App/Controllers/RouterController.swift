@@ -9,40 +9,56 @@ import Vapor
 import Nats
 import NatsUtilities
 
-class RouterController: NatsRouter {
-    let container: Container
-    let gray: GraylogController
-    
-    init(c: Container, gray: GraylogController) {
-        self.container = c
-        self.gray = gray
-    }
-    
-    func onOpen(handler: NatsProtocol) {
-        print("OPEN")
-        handler.subscribe("internal.report.error", queueGroup: CONSTANTS.INSTANCE_NAME) { msg in
-            do {
-                let notify = try JSONDecoder().decode(NatsNotificationModel<ErrorReportingNotification.Params>.self, from: msg.payload)
-                let grayModel = GraylogModel.generate(notify)
-                let data = try JSONEncoder().encode(grayModel)
-                self.gray.write(data: data)
-            } catch {
-                debugPrint(error)
-            }
-            }.whenSuccess { (Void) in
-                print("[ NATS ] [\(Date())] Subscribed to: internal.broadcast.errors")
+
+extension Application {
+    var router: RouterController {
+        if let existing = self.storage[RouterControllerKey.self] {
+            return existing
+        } else {
+            let somegray = try! GraylogController(app: self)
+            let new = RouterController(somegray)
+            self.storage[RouterControllerKey.self] = new
+            return new
         }
     }
+
+    struct RouterControllerKey: StorageKey {
+        typealias Value = RouterController
+    }
     
-    func onStreamingOpen(handler: NatsProtocol) {
+    class RouterController {
         
-    }
-    func onClose(handler: NatsProtocol) {
+        let gray: GraylogController
         
-    }
-    func onError(handler: NatsProtocol, error: Error) {
+        init(_ gray: GraylogController) {
+            self.gray = gray
+        }
         
-    }
+        func onOpen(conn: NatsConnection) {
+            print("OPEN")
+            conn.subscribe("internal.report.error", queueGroup: CONSTANTS.INSTANCE_NAME) { msg in
+                do {
+                    let notify = try JSONDecoder().decode(NatsNotificationModel<ErrorReportingNotification.Params>.self, from: msg.payload)
+                    let grayModel = GraylogModel.generate(notify)
+                    let data = try JSONEncoder().encode(grayModel)
+                    self.gray.write(data: data)
+                } catch {
+                    debugPrint(error)
+                }
+                }.whenSuccess { (Void) in
+                    print("[ NATS ] [\(Date())] Subscribed to: internal.broadcast.errors")
+            }
+        }
+        
+        func onStreamingOpen(conn: NatsConnection) {
+            
+        }
+        func onClose(conn: NatsConnection) {
+            
+        }
+        func onError(conn: NatsConnection, error: Error) {
+            
+        }
 
+    }
 }
-

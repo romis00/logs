@@ -16,20 +16,20 @@ import Logging
 
 public final class GraylogController {
 
-    
-    let container: Container
+    let app: Application
+    //let eventLoop = EventLoop
     weak var channel: Channel?
     let logger: Logger
     
-    public init(c: Container, logger: Logger = Logger(label: "Nats.Client.logger")) throws {
+    init(app: Application, logger: Logger = Logger(label: "Nats.Client.logger")) throws {
+        self.app = app
         self.logger = logger
-        self.container = c
         makeConnection()
     }
     
     func makeConnection() {
-        let handler = GraylogHandler(container: container)
-        let bootstrap = ClientBootstrap(group: container.eventLoop)
+        let handler = GraylogHandler()
+        let bootstrap = ClientBootstrap(group: app.eventLoopGroup.next())
             .channelOption(ChannelOptions.socket(SocketOptionLevel(SOL_SOCKET), SO_REUSEADDR), value: 1)
             .channelInitializer { channel in
                 self.channel = channel
@@ -40,10 +40,10 @@ public final class GraylogController {
                 ]
                 return .andAllSucceed(
                     handlers.map { channel.pipeline.addHandler($0, name: $1) },
-                    on: self.container.eventLoop.next()
+                    on: self.app.eventLoopGroup.next()
                 )
         }
-        _ = bootstrap.connect(host: "10.7.8.132", port: 12201).map { (channel) in
+        _ = bootstrap.connect(host: "0.0.0.0", port: 4222).map { (channel) in //host: "10.7.8.132", port: 12201
             _ = channel.closeFuture.map { _ in
                 fatalError("CONNECTION TO GRAYLOGS DISCONNECTED")
             }
