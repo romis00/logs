@@ -13,4 +13,5 @@ public struct CONSTANTS {
     public static let INSTANCE_ID = UUID()
     public static let PROTOCOL_VERSION: Int = 3
     public static let INTERNAL_BROADCAST_PREFIX = "internal.broadcast"
+    public static let INTERNAL_REPORT_NAME = "internal.report.error"
 }

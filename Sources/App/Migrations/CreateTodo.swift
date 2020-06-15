@@ -57,8 +57,29 @@ struct GraylogModel: Codable {
         self.moduleID = moduleID
     }
     
-    static func generate(_ notification: NatsNotificationModel<ErrorReportingNotification.Params>) -> GraylogModel{
-        return GraylogModel(from: Decoder.self as! Decoder, version: notification.version, host: notification.params.identifier, timestamp: Date(), level: 5, id: notification.params.id, suggestedFixes: "", possibleCauses: notification.params.reason, sourceLocation: notification.params.source, stackTrace: notification.params.stackTrace, originalMessage: notification.params.originalMessage, natsSubject: notification.params.userInfo, moduleName: notification.method, moduleID: UUID())
+    
+    //temporary check, can delete
+    init(from: Decoder, sourceLocation: ErrorSource?, originalMessage: NatsMessageCodable?) {
+        
+        self.version = 3
+        self.host = ""
+        self.timestamp = Date()
+        self.level = 5
+        
+        self.id = 1111
+        self.suggestedFixes = ""
+        self.possibleCauses = ""
+        self.sourceLocation = sourceLocation
+        self.stackTrace = ""
+        self.originalMessage = originalMessage
+        self.natsSubject = ""
+        self.moduleName = ""
+        self.moduleID = UUID()
     }
-//    1. Overloads for 'GraylogModel' exist with these partially matching parameter lists: (from: Decoder), (host: String, shortMessage: String, fullMessage: String, timestamp: Double?, level: Int, id: Int, suggestedFixes: [String]?, possibleCauses: [String]?, stackTrace: [String]?, originalMessage: String?, natsSubject: String?, moduleName: String?, moduleID: UUID?)
+    //_________________________________
+    
+    static func generate(_ notification: NatsNotificationModel<ErrorReportingNotification.Params>) -> GraylogModel{
+        //return GraylogModel(from: Decoder.self as! Decoder, sourceLocation: notification.params.source, originalMessage: notification.params.originalMessage)
+        return GraylogModel(from: Decoder.self as! Decoder, version: notification.version, host: notification.params.identifier, timestamp: Date(), level: 5, id: notification.params.id, suggestedFixes: nil, possibleCauses: notification.params.reason, sourceLocation: notification.params.source, stackTrace: notification.params.stackTrace, originalMessage: notification.params.originalMessage, natsSubject: notification.params.userInfo, moduleName: notification.method, moduleID: UUID())
+    }
 }

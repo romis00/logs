@@ -35,19 +35,27 @@ extension Application {
         }
         
         func onOpen(conn: NatsConnection) {
+            
             print("OPEN")
-            conn.subscribe("internal.report.error", queueGroup: CONSTANTS.INSTANCE_NAME) { msg in
+            
+            conn.subscribe(CONSTANTS.INTERNAL_REPORT_NAME, queueGroup: CONSTANTS.INSTANCE_NAME) { msg in
                 do {
                     let notify = try JSONDecoder().decode(NatsNotificationModel<ErrorReportingNotification.Params>.self, from: msg.payload)
                     let grayModel = GraylogModel.generate(notify)
                     let data = try JSONEncoder().encode(grayModel)
                     self.gray.write(data: data)
+                    
+                    msg.reply(data)
+                    
                 } catch {
                     debugPrint(error)
                 }
                 }.whenSuccess { (Void) in
                     print("[ NATS ] [\(Date())] Subscribed to: internal.broadcast.errors")
             }
+            
+            conn.request(CONSTANTS.INTERNAL_REPORT_NAME, payload: Data(), timeout: 60)
+            
         }
         
         func onStreamingOpen(conn: NatsConnection) {
@@ -57,6 +65,8 @@ extension Application {
             
         }
         func onError(conn: NatsConnection, error: Error) {
+            
+            print("ON ERROR GOES")
             
         }
 
